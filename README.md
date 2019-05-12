@@ -1,41 +1,26 @@
+
+FIXME change to circleci
 # url [![Travis CI status](https://secure.travis-ci.org/cemerick/url.png)](http://travis-ci.org/#!/cemerick/url/builds)
 
-This is a library that makes working with URLs in Clojure and ClojureScript a
-little more pleasant.
+This is a library that makes working with URLs in Clojure and ClojureScript a little more pleasant. Originally forked
+from https://github.com/cemerick/url to allow duplicate key query params for collections.
 
 ## "Installation"
 
-url is available in Clojars. Add this `:dependency` to your Leiningen
-`project.clj`:
+url is available in Clojars. Add this `:dependency` to your Leiningen `project.clj`:
 
 ```clojure
+FIXME: Update to our url
 [com.cemerick/url "0.1.1"]
 ```
 
-Or, add this to your Maven project's `pom.xml`:
-
-```xml
-<repository>
-  <id>clojars</id>
-  <url>http://clojars.org/repo</url>
-</repository>
-
-<dependency>
-  <groupId>com.cemerick</groupId>
-  <artifactId>url</artifactId>
-  <version>0.1.1</version>
-</dependency>
-```
-
-Starting with version `0.1.0`, url requires Clojure >= 1.5.0.  It provides the
-same API under ClojureScript (tested with ClojureScript `0.0-1835`, and should
-work well with any later revision).
+Starting with version `0.1.0`, url requires Clojure >= 1.5.0. It provides the same API under ClojureScript (tested with
+ClojureScript `0.0-1835`, and should work well with any later revision).
 
 ## Usage
 
-The `cemerick.url/url` function returns an instance of the
-`cemerick.url.URL` record type that allows you to easily work with each
-datum within the provided URL:
+The `cemerick.url/url` function returns an instance of the `cemerick.url.URL` record type that allows you to easily work
+with each datum within the provided URL:
 
 ```clojure
 => (require '[cemerick.url :refer (url url-encode)])
@@ -71,9 +56,9 @@ The `:query` slot can be a string or a map of params:
 "https://api.twitter.com/1/users/profile_image/cemerick?a=5&b=6"
 ```
 
-Note that `url` does not perform any url-encoding of paths.  Use
+Note that `url` does not perform any url-encoding of paths. Use
 `cemerick.url/url-encode` to url-encode any paths/path components prior
-to passing them to `url`.  e.g.:
+to passing them to `url`. e.g.:
 
 ```clojure
 => (def download-root "http://foo.com/dl")
