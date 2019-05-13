@@ -5,7 +5,7 @@
 This is a library that makes working with URLs in Clojure and ClojureScript a little more pleasant. Originally forked
 from https://github.com/cemerick/url to allow duplicate key query params for collections.
 
-Starting with version `0.1.2`, url requires Clojure >= 1.9.0. It provides the same API under ClojureScript (tested with
+Starting with version `0.1.2`, url requires Clojure >= `1.9.0`. It provides the same API under ClojureScript (tested with
 shadow-cljs in NodeJS using ClojureScript `1.10.520`, _and should work well with any later revision_).
 
 ## Usage
