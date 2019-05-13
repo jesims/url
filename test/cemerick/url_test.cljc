@@ -30,7 +30,7 @@
     (is (nil? (url/query->map ""))))
 
   (testing "Swagger Array examples"
-    (is (= {"id" [3 4 5]} (url/query->map "id=3&id=4&id=5")))
+    (is (= {"id" ["3" "4" "5"]} (url/query->map "id=3&id=4&id=5")))
     (is (= {"id" "3,4,5"} (url/query->map "id=3,4,5")))
     (is (= {"id" "3 4 5"} (url/query->map "id=3%204%205")))
     (is (= {"id" "3|4|5"} (url/query->map "id=3|4|5")))))

@@ -39,19 +39,30 @@
     (concat (repeat ""))
     (->> (take 2))))
 
+(defn reduce-params [params]
+  (reduce
+    (fn [m [k v]]
+      (if-let [existing-v (get m k)]
+        (if (coll? existing-v)
+          (update m k conj v)
+          (assoc m k [existing-v v]))
+        (assoc m k v)))
+    {}
+    (partition 2 params)))
+
 (defn query->map [qstr]
   (when (not (string/blank? qstr))
     (some->> (string/split qstr #"&")
              seq
              (mapcat split-param)
              (map url-decode)
-             (apply hash-map))))
+             reduce-params)))
 
 (defn- port-str [protocol port]
   (when (and (not= nil port)
-             (not= -1 port)
-             (not (and (== port 80) (= protocol "http")))
-             (not (and (== port 443) (= protocol "https"))))
+          (not= -1 port)
+          (not (and (== port 80) (= protocol "http")))
+          (not (and (== port 443) (= protocol "https"))))
     (str ":" port)))
 
 (defn- url-creds [username password]
