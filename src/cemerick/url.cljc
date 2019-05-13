@@ -1,35 +1,30 @@
 (ns cemerick.url
-  #+clj (:import (java.net URLEncoder URLDecoder))
-  #+cljs (:require-macros [clojure.core :refer [some-> some->>]])
-  (:require [pathetic.core :as pathetic]
-    [clojure.string :as string]
-    #+cljs [goog.Uri :as uri]))
+  (:require
+    [pathetic.core :as pathetic]
+    [clojure.string :as string])
+  #?(:cljs (:require [goog.Uri :as uri])
+     :clj  (:import
+             (java.net URLEncoder URLDecoder))))
 
-#+clj
 (defn url-encode
   [string]
-  (some-> string str (URLEncoder/encode "UTF-8") (.replace "+" "%20")))
+  (some-> string
+          str
+          #?(:clj (URLEncoder/encode "UTF-8") :cljs (js/encodeURIComponent))
+          (.replace "+" "%20")))
 
-#+cljs
-(defn url-encode
-  [string]
-  (some-> string str (js/encodeURIComponent) (.replace "+" "%20")))
+#?(:clj  (defn url-decode
+           ([string] (url-decode string "UTF-8"))
+           ([string encoding]
+            (some-> string str (URLDecoder/decode encoding))))
 
-#+clj
-(defn url-decode
-  ([string] (url-decode string "UTF-8"))
-  ([string encoding]
-   (some-> string str (URLDecoder/decode encoding))))
+   :cljs (defn url-decode
+           [string]
+           (some-> string str (js/decodeURIComponent))))
 
-#+cljs
-(defn url-decode
-  [string]
-  (some-> string str (js/decodeURIComponent)))
-
-(defn map->query
-  [m]
+(defn map->query [m]
   (some->> (seq m)
-           sort                                             ; sorting makes testing a lot easier :-)
+           sort
            (map (fn [[k v]]
                   [(url-encode (name k))
                    "="
@@ -42,11 +37,9 @@
   (->
     (string/split param #"=")
     (concat (repeat ""))
-    (->>
-      (take 2))))
+    (->> (take 2))))
 
-(defn query->map
-  [qstr]
+(defn query->map [qstr]
   (when (not (string/blank? qstr))
     (some->> (string/split qstr #"&")
              seq
@@ -54,21 +47,18 @@
              (map url-decode)
              (apply hash-map))))
 
-(defn- port-str
-  [protocol port]
+(defn- port-str [protocol port]
   (when (and (not= nil port)
              (not= -1 port)
              (not (and (== port 80) (= protocol "http")))
              (not (and (== port 443) (= protocol "https"))))
     (str ":" port)))
 
-(defn- url-creds
-  [username password]
+(defn- url-creds [username password]
   (when username
     (str username ":" password)))
 
-(defrecord URL
-  [protocol username password host port path query anchor]
+(defrecord URL [protocol username password host port path query anchor]
   Object
   (toString [this]
     (let [creds (url-creds username password)]
@@ -83,40 +73,34 @@
                                     (map->query query))))
         (when anchor (str \# anchor))))))
 
-#+clj
-(defn- url*
-  [url]
-  (let [url (java.net.URL. url)
-        [user pass] (string/split (or (.getUserInfo url) "") #":" 2)]
-    (URL. (.toLowerCase (.getProtocol url))
-      (and (seq user) user)
-      (and (seq pass) pass)
-      (.getHost url)
-      (.getPort url)
-      (pathetic/normalize (.getPath url))
-      (query->map (.getQuery url))
-      (.getRef url))))
+#?(:cljs (defn translate-default [s old-default new-default]
+           (if (= s old-default)
+             new-default
+             s)))
 
-#+cljs
-(defn translate-default
-  [s old-default new-default]
-  (if (= s old-default)
-    new-default
-    s))
+#?(:clj  (defn- url* [url]
+           (let [url (java.net.URL. url)
+                 [user pass] (string/split (or (.getUserInfo url) "") #":" 2)]
+             (URL. (.toLowerCase (.getProtocol url))
+               (and (seq user) user)
+               (and (seq pass) pass)
+               (.getHost url)
+               (.getPort url)
+               (pathetic/normalize (.getPath url))
+               (query->map (.getQuery url))
+               (.getRef url))))
 
-#+cljs
-(defn- url*
-  [url]
-  (let [url (goog.Uri. url)
-        [user pass] (string/split (or (.getUserInfo url) "") #":" 2)]
-    (URL. (.getScheme url)
-      (and (seq user) user)
-      (and (seq pass) pass)
-      (.getDomain url)
-      (translate-default (.getPort url) nil -1)
-      (pathetic/normalize (.getPath url))
-      (query->map (translate-default (.getQuery url) "" nil))
-      (translate-default (.getFragment url) "" nil))))
+   :cljs (defn- url* [url]
+           (let [url (goog.Uri. url)
+                 [user pass] (string/split (or (.getUserInfo url) "") #":" 2)]
+             (URL. (.getScheme url)
+               (and (seq user) user)
+               (and (seq pass) pass)
+               (.getDomain url)
+               (translate-default (.getPort url) nil -1)
+               (pathetic/normalize (.getPath url))
+               (query->map (translate-default (.getQuery url) "" nil))
+               (translate-default (.getFragment url) "" nil)))))
 
 (defn url
   "Returns a new URL record for the given url string(s).
@@ -138,4 +122,3 @@
      (assoc base-url :path (pathetic/normalize (reduce pathetic/resolve
                                                  (:path base-url)
                                                  path-segments))))))
-
