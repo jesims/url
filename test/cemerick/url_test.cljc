@@ -51,16 +51,18 @@
 (deftest query->map-test
 
   (testing "query->map"
-    (is (= {"a" "b"}
-           (url/query->map "a=b")))
-    (is (= {"a" "1" "b" "2" "c" "3"}
-           (url/query->map "a=1&b=2&c=3")))
-    (is (= {"a" ""}
-           (url/query->map "a=")))
-    (is (= {"a" ""}
-           (url/query->map "a")))
+    (is (= {"a" "b"} (url/query->map "a=b")))
+    (is (= {"a" "1" "b" "2" "c" "3"} (url/query->map "a=1&b=2&c=3")))
+    (is (= {"a" ""} (url/query->map "a=")))
+    (is (= {"a" ""} (url/query->map "a")))
     (is (nil? (url/query->map nil)))
-    (is (nil? (url/query->map "")))))
+    (is (nil? (url/query->map ""))))
+
+  (testing "Swagger Array examples"
+    (is (= {"id" [3 4 5]} (url/query->map "id=3&id=4&id=5")))
+    (is (= {"id" "3,4,5"} (url/query->map "id=3,4,5")))
+    (is (= {"id" "3 4 5"} (url/query->map "id=3%204%205")))
+    (is (= {"id" "3|4|5"} (url/query->map "id=3|4|5")))))
 
 (deftest user-info-edgecases
   (let [user-info (fn [url-str] (->> url-str url/url ((juxt :username :password))))]
