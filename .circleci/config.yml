@@ -80,9 +80,6 @@ workflows:
       - test_cljs:
           requires:
             - deps
-      - test_docs:
-          requires:
-            - deps
       - snapshot:
           context: JESI
           requires:
