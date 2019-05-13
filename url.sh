@@ -12,51 +12,19 @@ shadow-cljs () {
 	lein with-profile +test trampoline run -m shadow.cljs.devtools.cli $@
 }
 
-## stop:
-## Stops shadow-cljs
-stop () {
-	shadow-cljs stop &>/dev/null
-}
-
 ## clean:
 ## Cleans up the compiled and generated sources
 clean () {
-	stop
 	lein clean
 	rm -rf .shadow-cljs/
 }
 
-_unit-test () {
-	refresh=$1
-	clean
-	echo_message 'In the animal kingdom, the rule is, eat or be eaten.'
-	if [[ "${refresh}" = true ]];then
-		lein auto test ${@:2}
-	else
-		lein test
-	fi
-	abort_on_error 'Clojure tests failed'
-}
-
-## test:
-## args: [-r]
-## Runs the Clojure unit tests
-## [-r] Watches tests and source files for changes, and subsequently re-evaluates
-test () {
-	case $1 in
-		-r)
-			_unit-test true ${@:2};;
-		*)
-			_unit-test;;
-	esac
-}
-
-## test-cljs:
-## Runs the ClojureScript unit tests
-test-cljs () {
-	shadow-cljs compile node \
-	&& node target/node/test.js
-	abort_on_error 'node tests failed'
+## deps:
+## Installs all required dependencies for Clojure and ClojureScript
+deps () {
+	echo_message 'Installing dependencies'
+	lein deps
+	abort_on_error
 }
 
 is-snapshot () {
@@ -110,6 +78,40 @@ release () {
 		echo_message 'SNAPSHOT suffix already defined... Aborting'
 		exit 1
 	fi
+}
+
+_unit-test () {
+	refresh=$1
+	clean
+	echo_message 'Running Tests'
+	if [[ "${refresh}" = true ]];then
+		lein auto test ${@:2}
+	else
+		lein test
+	fi
+	abort_on_error 'Clojure tests failed'
+}
+
+## test:
+## args: [-r]
+## Runs the Clojure unit tests
+## [-r] Watches tests and source files for changes, and subsequently re-evaluates
+test () {
+	case $1 in
+		-r)
+			_unit-test true ${@:2};;
+		*)
+			_unit-test;;
+	esac
+}
+
+## test-cljs:
+## Runs the ClojureScript unit tests
+test-cljs () {
+	echo_message 'Running CLJS Tests'
+	shadow-cljs compile node \
+	&& node target/node/test.js
+	abort_on_error 'node tests failed'
 }
 
 script-invoke $@
