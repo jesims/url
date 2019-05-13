@@ -9,7 +9,7 @@ if [[ $? -ne 0 ]];then
 fi
 
 shadow-cljs () {
-	lein with-profile +dev trampoline run -m shadow.cljs.devtools.cli $@
+	lein with-profile +test trampoline run -m shadow.cljs.devtools.cli $@
 }
 
 ## stop:
