@@ -1,7 +1,7 @@
 (ns cemerick.url
   (:require
-    [pathetic.core :as pathetic]
-    [clojure.string :as string])
+    [clojure.string :as string]
+    [pathetic.core :as pathetic])
   #?(:cljs (:require [goog.Uri :as uri])
      :clj  (:import
              (java.net URLEncoder URLDecoder))))
