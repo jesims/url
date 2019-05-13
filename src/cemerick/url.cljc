@@ -10,25 +10,30 @@
   [string]
   (some-> string
           str
-          #?(:clj (URLEncoder/encode "UTF-8") :cljs (js/encodeURIComponent))
+          #?(:clj  (URLEncoder/encode "UTF-8")
+             :cljs (js/encodeURIComponent))
           (.replace "+" "%20")))
 
-#?(:clj  (defn url-decode
-           ([string] (url-decode string "UTF-8"))
-           ([string encoding]
-            (some-> string str (URLDecoder/decode encoding))))
+(defn url-decode
+  [string]
+  (some-> string
+          str
+          #?(:clj  (URLDecoder/decode "UTF-8")
+             :cljs (js/decodeURIComponent))))
 
-   :cljs (defn url-decode
-           [string]
-           (some-> string str (js/decodeURIComponent))))
+(defn- kv->url-query [[k v]]
+  (let [k= (str (url-encode (name k)) \=)]
+    (if (coll? v)
+      (->> v
+           (map url-encode)
+           (interpose (str \& k=))
+           (apply str k=))
+      (str k= (url-encode v)))))
 
-(defn map->query [m]
-  (some->> (seq m)
-           sort
-           (map (fn [[k v]]
-                  [(url-encode (name k))
-                   "="
-                   (url-encode (str v))]))
+(defn map->query [query-map]
+  (some->> (seq query-map)
+           (mapcat (partial tree-seq (comp map? val) val))
+           (map kv->url-query)
            (interpose "&")
            flatten
            (apply str)))
@@ -39,7 +44,7 @@
     (concat (repeat ""))
     (->> (take 2))))
 
-(defn reduce-params [params]
+(defn- params->map [params]
   (reduce
     (fn [m [k v]]
       (if-let [existing-v (get m k)]
@@ -56,7 +61,7 @@
              seq
              (mapcat split-param)
              (map url-decode)
-             reduce-params)))
+             params->map)))
 
 (defn- port-str [protocol port]
   (when (and (not= nil port)
@@ -65,14 +70,14 @@
           (not (and (== port 443) (= protocol "https"))))
     (str ":" port)))
 
-(defn- url-creds [username password]
+(defn- url-credentials [username password]
   (when username
     (str username ":" password)))
 
 (defrecord URL [protocol username password host port path query anchor]
   Object
   (toString [this]
-    (let [creds (url-creds username password)]
+    (let [creds (url-credentials username password)]
       (str protocol "://"
         creds
         (when creds \@)

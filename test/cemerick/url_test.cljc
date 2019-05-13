@@ -11,13 +11,28 @@
 
   (testing "map->query"
     (is (= "a=1&b=2&c=3"
-           (url/map->query {:a 1 :b 2 :c 3})))
+          (url/map->query {:a 1
+                           :b 2
+                           :c 3})))
     (is (= "a=1&b=2&c=3"
-           (url/map->query {:a "1" :b "2" :c "3"})))
+          (url/map->query {:a "1"
+                           :b "2"
+                           :c "3"})))
     (is (= "a=1&b=2"
-           (url/map->query {"a" "1" "b" "2"})))
+          (url/map->query {"a" "1"
+                           "b" "2"})))
     (is (= "a="
-           (url/map->query {"a" ""})))))
+          (url/map->query {"a" ""}))))
+
+  (testing "Swagger Array examples"
+    (is (= "id=3&id=4&id=5"
+          (url/map->query {:id [3 4 5]})))
+    (is (= "id=3%2C4%2C5"
+          (url/map->query {:id "3,4,5"})))
+    (is (= "id=3%204%205"
+          (url/map->query {:id "3 4 5"})))
+    (is (= "id=3%7C4%7C5"
+          (url/map->query {:id "3|4|5"})))))
 
 (deftest query->map-test
 
