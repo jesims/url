@@ -1,37 +1,21 @@
-(defproject com.cemerick/url "0.1.2-SNAPSHOT"
-  :description "Makes working with URLs in Clojure a little more pleasant."
-  :url "http://github.com/cemerick/url"
-  :license {:name "Eclipse Public License"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.5.1"]
-                 [pathetic "0.5.0"]
-                 [org.clojure/clojurescript "0.0-1835" :optional true]]
+(def VERSION (.trim (slurp "VERSION")))
 
-  :source-paths ["src" "target/generated-src"]
-  :test-paths ["target/generated-test"]
-  :aliases  {"cleantest" ["do" "clean," "cljx" "once," "test,"
-                          "cljsbuild" "once," "cljsbuild" "test"]}
-  :profiles {:dev {:dependencies [[com.cemerick/clojurescript.test "0.0.4"]
-                                  [com.keminglabs/cljx "0.3.0"]
-                                  [com.cemerick/piggieback "0.0.5"]]
-                   :plugins [[lein-cljsbuild "0.3.2"]
-                             [com.keminglabs/cljx "0.3.0"]]
-                   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl
-                                                     cljx.repl-middleware/wrap-cljx]}}}
-  :cljx {:builds [{:source-paths ["src"]
-                   :output-path "target/generated-src"
-                   :rules :clj}
-                  {:source-paths ["src"]
-                   :output-path "target/generated-src"
-                   :rules :cljs}
-                  {:source-paths ["test"]
-                   :output-path "target/generated-test"
-                   :rules :clj}
-                  {:source-paths ["test"]
-                   :output-path "target/generated-test"
-                   :rules :cljs}]}
-  :cljsbuild {:builds [{:source-paths ["target/generated-src" "target/generated-test"]
-                        :compiler {:output-to "target/cljs/testable.js"}
-                        :optimizations :whitespace
-                        :pretty-print true}]
-              :test-commands {"unit-tests" ["runners/phantomjs.js" "target/cljs/testable.js"]}})
+(defproject io.jesi/url VERSION
+  :description "Makes working with URLs in Clojure a little more pleasant."
+  :url "http://github.com/jesims/url"
+  :license {:name "Eclipse Public License"
+            :url  "http://www.eclipse.org/legal/epl-v10.html"}
+  :min-lein-version "2.9.0"
+  :plugins [[lein-parent "0.3.5"]
+            [lein-auto "0.1.3"]]
+  :source-paths ["src"]
+  :test-paths ["test"]
+  :clean-targets ^{:protect false} ["target"]
+
+  :parent-project {:coords  [io.jesi/parent "0.0.15"]
+                   :inherit [:plugins :managed-dependencies :deploy-repositories :dependencies [:profiles :dev] :test-refresh]}
+
+  :dependencies [[org.clojure/clojure "1.9.0"]
+                 [pathetic "0.5.1"]]
+
+  :profiles {:test [:dev {:dependencies [[thheller/shadow-cljs]]}]})
