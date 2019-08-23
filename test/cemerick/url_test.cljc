@@ -11,28 +11,28 @@
 
   (testing "map->query"
     (is (= "a=1&b=2&c=3"
-          (url/map->query {:a 1
-                           :b 2
-                           :c 3})))
+           (url/map->query {:a 1
+                            :b 2
+                            :c 3})))
     (is (= "a=1&b=2&c=3"
-          (url/map->query {:a "1"
-                           :b "2"
-                           :c "3"})))
+           (url/map->query {:a "1"
+                            :b "2"
+                            :c "3"})))
     (is (= "a=1&b=2"
-          (url/map->query {"a" "1"
-                           "b" "2"})))
+           (url/map->query {"a" "1"
+                            "b" "2"})))
     (is (= "a="
-          (url/map->query {"a" ""}))))
+           (url/map->query {"a" ""}))))
 
   (testing "Swagger Array examples"
     (is (= "id=3&id=4&id=5"
-          (url/map->query {:id [3 4 5]})))
+           (url/map->query {:id [3 4 5]})))
     (is (= "id=3%2C4%2C5"
-          (url/map->query {:id "3,4,5"})))
+           (url/map->query {:id "3,4,5"})))
     (is (= "id=3%204%205"
-          (url/map->query {:id "3 4 5"})))
+           (url/map->query {:id "3 4 5"})))
     (is (= "id=3%7C4%7C5"
-          (url/map->query {:id "3|4|5"})))))
+           (url/map->query {:id "3|4|5"})))))
 
 (deftest query->map-test
 
@@ -108,6 +108,18 @@
     (is (= "http://a#x" (url-str "http://a#x")))
     (is (= "http://a?b=c#x" (url-str "http://a?b=c#x")))
     (is (= "http://a?b=c#x" (-> "http://a#x" url/url (assoc :query {:b "c"}) str)))))
+
+(deftest anchor-query
+
+  (testing "anchor query"
+    (is (= "http://a.com/#b?c=d" (url-str "http://a.com/#b?c=d")))
+    (is (= "http://a.com/?e=f#b?c=d" (url-str "http://a.com/?e=f#b?c=d")))
+    (is (= "http://a.com/?e=f#b?c=d" (-> "http://a.com/#b"
+                                         url/url
+                                         (assoc
+                                           :query {:e "f"}
+                                           :anchor-query {:c "d"})
+                                         str)))))
 
 (deftest no-bare-?
 
