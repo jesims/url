@@ -95,7 +95,7 @@
         (port-str protocol port)
         path
         (query->str query)
-        (when anchor (str \# anchor))
+        (when (or anchor (seq anchor-query)) (str \# anchor))
         (query->str anchor-query)))))
 
 #?(:cljs (defn translate-default [s old-default new-default]

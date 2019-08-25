@@ -119,7 +119,16 @@
                                          (assoc
                                            :query {:e "f"}
                                            :anchor-query {:c "d"})
-                                         str)))))
+                                         str))))
+
+  (testing "anchor query without an anchor"
+    (is (= "http://a.com/#?c=d" (url-str "http://a.com/#?c=d")))
+    (is (= "http://a.com/?e=f#?c=d" (-> "http://a.com/"
+                                        url/url
+                                        (assoc
+                                          :query {:e "f"}
+                                          :anchor-query {:c "d"})
+                                        str)))))
 
 (deftest no-bare-?
 
