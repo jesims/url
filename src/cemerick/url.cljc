@@ -65,16 +65,26 @@
 
 (defn- port-str [protocol port]
   (when (and (not= nil port)
-          (not= -1 port)
-          (not (and (== port 80) (= protocol "http")))
-          (not (and (== port 443) (= protocol "https"))))
+             (not= -1 port)
+             (not (and (== port 80) (= protocol "http")))
+             (not (and (== port 443) (= protocol "https"))))
     (str ":" port)))
 
 (defn- url-credentials [username password]
   (when username
     (str username ":" password)))
 
-(defrecord URL [protocol username password host port path query anchor]
+(defn- query->str [query]
+  (when (seq query)
+    (str \? (if (string? query)
+              query
+              (map->query query)))))
+
+(defn- split-anchor [anchor]
+  (when-not (string/blank? anchor)
+    (string/split anchor #"\?")))
+
+(defrecord URL [protocol username password host port path query anchor anchor-query]
   Object
   (toString [this]
     (let [creds (url-credentials username password)]
@@ -84,10 +94,9 @@
         host
         (port-str protocol port)
         path
-        (when (seq query) (str \? (if (string? query)
-                                    query
-                                    (map->query query))))
-        (when anchor (str \# anchor))))))
+        (query->str query)
+        (when (or anchor (seq anchor-query)) (str \# anchor))
+        (query->str anchor-query)))))
 
 #?(:cljs (defn translate-default [s old-default new-default]
            (if (= s old-default)
@@ -96,7 +105,8 @@
 
 #?(:clj  (defn- url* [url]
            (let [url (java.net.URL. url)
-                 [user pass] (string/split (or (.getUserInfo url) "") #":" 2)]
+                 [user pass] (string/split (or (.getUserInfo url) "") #":" 2)
+                 [anchor anchor-query] (split-anchor (.getRef url))]
              (URL. (.toLowerCase (.getProtocol url))
                (and (seq user) user)
                (and (seq pass) pass)
@@ -104,11 +114,14 @@
                (.getPort url)
                (pathetic/normalize (.getPath url))
                (query->map (.getQuery url))
-               (.getRef url))))
+               anchor
+               (query->map anchor-query))))
 
    :cljs (defn- url* [url]
            (let [url (goog.Uri. url)
-                 [user pass] (string/split (or (.getUserInfo url) "") #":" 2)]
+                 [user pass] (string/split (or (.getUserInfo url) "") #":" 2)
+                 anchor (translate-default (.getFragment url) "" nil)
+                 [anchor anchor-query] (split-anchor anchor)]
              (URL. (.getScheme url)
                (and (seq user) user)
                (and (seq pass) pass)
@@ -116,7 +129,8 @@
                (translate-default (.getPort url) nil -1)
                (pathetic/normalize (.getPath url))
                (query->map (translate-default (.getQuery url) "" nil))
-               (translate-default (.getFragment url) "" nil)))))
+               anchor
+               (query->map anchor-query)))))
 
 (defn url
   "Returns a new URL record for the given url string(s).
