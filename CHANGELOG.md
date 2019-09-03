@@ -1,5 +1,4 @@
-## 0.2.0
-==================
+# 0.2.0
 
 Added:
 * Anchors are now broken into `anchor` and `anchor-query`
@@ -7,8 +6,7 @@ Added:
 Changed:
 * Upgraded clojure to `1.10.1`
 
-## 0.1.2
-==================
+# 0.1.2
 
 Added:
 * Bumped Clojure dependency to `1.9.0`
