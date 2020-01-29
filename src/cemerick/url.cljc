@@ -1,10 +1,10 @@
 (ns cemerick.url
   (:require
+    #?(:cljs [goog.Uri])
     [clojure.string :as string]
     [pathetic.core :as pathetic])
-  #?(:cljs (:require [goog.Uri :as uri])
-     :clj  (:import
-             (java.net URLEncoder URLDecoder))))
+  #?(:clj (:import
+            (java.net URLDecoder URLEncoder))))
 
 (defn url-encode
   [string]
