@@ -7,73 +7,90 @@ aliases:
       paths:
         - ~/.lein
         - ~/.m2
+    node_cache: &NODE_CACHE
+      key: lein-{{ checksum "package-lock.json" }}
+      paths:
+        - node_modules
   containers:
     docker: &DEFAULT
       - image: jesiio/build-bus:latest
-        environment:
-          JVM_OPTS: -Xmx3200m
-          DEBUG: 1
+        user: node
   commands:
     cancel_redundant: &CANCEL_REDUNDANT
       run:
         name: Check & Cancel Redundant Build
         command: 'cancel-redundant-builds.sh'
+    submodule: &SUBMODULE
+      run: git submodule update --init
 jobs:
   deps:
     docker: *DEFAULT
     steps:
       - *CANCEL_REDUNDANT
       - checkout
+      - *SUBMODULE
       - restore_cache:
           <<: *LEIN_CACHE
+      - restore_cache:
+          <<: *NODE_CACHE
       - run: './url.sh deps'
       - save_cache:
           <<: *LEIN_CACHE
+  lint:
+    docker: *DEFAULT
+    steps:
+      - *CANCEL_REDUNDANT
+      - checkout
+      - *SUBMODULE
+      - restore_cache:
+          <<: *LEIN_CACHE
+      - run: './url.sh lint'
   test_clj:
     docker: *DEFAULT
     steps:
       - *CANCEL_REDUNDANT
       - checkout
+      - *SUBMODULE
       - restore_cache:
           <<: *LEIN_CACHE
       - run: './url.sh test'
-      - save_cache:
-          <<: *LEIN_CACHE
   test_cljs:
     docker: *DEFAULT
     steps:
       - *CANCEL_REDUNDANT
       - checkout
+      - *SUBMODULE
       - restore_cache:
           <<: *LEIN_CACHE
+      - restore_cache:
+          <<: *NODE_CACHE
       - run: './url.sh test-cljs'
-      - save_cache:
-          <<: *LEIN_CACHE
   snapshot:
     docker: *DEFAULT
     steps:
       - *CANCEL_REDUNDANT
       - checkout
+      - *SUBMODULE
       - restore_cache:
           <<: *LEIN_CACHE
       - run: './url.sh snapshot'
-      - save_cache:
-          <<: *LEIN_CACHE
   release:
     docker: *DEFAULT
     steps:
       - *CANCEL_REDUNDANT
       - checkout
+      - *SUBMODULE
       - restore_cache:
           <<: *LEIN_CACHE
       - run: './url.sh release'
-      - save_cache:
-          <<: *LEIN_CACHE
 workflows:
   version: 2
   build:
     jobs:
       - deps
+      - lint:
+          requires:
+            - deps
       - test_clj:
           requires:
             - deps
@@ -83,6 +100,7 @@ workflows:
       - snapshot:
           context: JESI
           requires:
+            - lint
             - test_clj
             - test_cljs
           filters:
@@ -91,6 +109,7 @@ workflows:
       - release:
           context: JESI
           requires:
+            - lint
             - test_clj
             - test_cljs
           filters:

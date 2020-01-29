@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [=])
   (:require
     [cemerick.url :as url]
-    [io.jesi.customs.strict :refer [deftest is testing is= =]])
+    [io.jesi.customs.strict :refer [= deftest is is= testing]])
   #?(:clj
      (:import java.net.URL)))
 
