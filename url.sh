@@ -27,6 +27,10 @@ deploy () {
 	deploy-clojars
 }
 
+deploy-snapshot () {
+	deploy-clojars
+}
+
 ## snapshot:
 ## args: [-l]
 ## Pushes a snapshot to Clojars
