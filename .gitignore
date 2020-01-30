@@ -5,6 +5,7 @@
 .cljs_node_repl/
 .externalToolBuilders/
 .idea/libraries/
+.idea/workspace.xml
 .lein-deps-sum
 .lein-failures
 .lein-plugins
