@@ -33,7 +33,11 @@
     (is (= "id=3%204%205"
            (url/map->query {:id "3 4 5"})))
     (is (= "id=3%7C4%7C5"
-           (url/map->query {:id "3|4|5"})))))
+           (url/map->query {:id "3|4|5"}))))
+
+  (testing "custom encoder example"
+    (is (= "hoge=hoge&hoge=hoge"
+           (url/map->query {:a "1" :b "2"} {:encoder (constantly "hoge")})))))
 
 (deftest query->map-test
 
