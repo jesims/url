@@ -1,3 +1,16 @@
+# 0.3.0
+
+Added:
+
+* Custom Encoder Support. Thanks @saitouena. #4
+
+Miscellaneous:
+
+* Update `io.jesi/parent` to `3.10.0`
+* Update `lein-parent` to `0.3.8`
+* Update `ws` to `7.2.5`
+* Moved `thheller/shadow-cljs` to dev-dependency
+
 # 0.2.1
 
 * Fix cljsbuild issue with multiple requires in ns

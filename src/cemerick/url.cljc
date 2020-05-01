@@ -21,22 +21,30 @@
           #?(:clj  (URLDecoder/decode "UTF-8")
              :cljs (js/decodeURIComponent))))
 
-(defn- kv->url-query [[k v]]
-  (let [k= (str (url-encode (name k)) \=)]
+(defn- kv->url-query [[k v] encoder]
+  (let [k= (str (encoder (name k)) \=)]
     (if (coll? v)
       (->> v
-           (map url-encode)
+           (map encoder)
            (interpose (str \& k=))
            (apply str k=))
-      (str k= (url-encode v)))))
+      (str k= (encoder v)))))
 
-(defn map->query [query-map]
-  (some->> (seq query-map)
-           (mapcat (partial tree-seq (comp map? val) val))
-           (map kv->url-query)
-           (interpose "&")
-           flatten
-           (apply str)))
+(defn map->query
+  "transforms clojure map to query.
+   default encoder for .clj is java.net.URLEncoder/encode in UTF-8.
+   default encoder for .cljs is js/encodeURIComponent.
+   If you want to use custom encoder (like Shift-JIS),
+   you can specify it like (map->query m {:encoder your-encoder})."
+  ([query-map]
+   (map->query query-map nil))
+  ([query-map {:keys [encoder]}]
+   (some->> (seq query-map)
+            (mapcat (partial tree-seq (comp map? val) val))
+            (map #(kv->url-query % (or encoder url-encode)))
+            (interpose "&")
+            flatten
+            (apply str))))
 
 (defn split-param [param]
   (->
