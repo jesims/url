@@ -1,3 +1,9 @@
+# 0.3.0
+
+Added:
+
+* Custom Encoder Support. Thanks @saitouena. #4
+
 # 0.2.1
 
 * Fix cljsbuild issue with multiple requires in ns
